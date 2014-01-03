@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ime/workspace/yycurl/lib/mylib/ConsoleDisplay.cpp
+ConsoleDisplay.h
+/home/ime/workspace/yycurl/lib/mylib/ConsoleDisplay.h
+DownloadNode.h
+/home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
+
+/home/ime/workspace/yycurl/lib/mylib/ConsoleDisplay.h
+Observer.h
+/home/ime/workspace/yycurl/lib/mylib/Observer.h
+iostream
+-
+stdio.h
+-
+pthread.h
+-
+
+/home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
+string
+-
+
+/home/ime/workspace/yycurl/lib/mylib/Observer.h
+vector
+-
+string
+-
+

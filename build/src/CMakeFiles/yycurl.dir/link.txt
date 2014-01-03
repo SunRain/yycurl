@@ -1,0 +1,1 @@
+/usr/bin/c++   -fpermissive -p -g -g   CMakeFiles/yycurl.dir/Main.cpp.o  -o ../bin/yycurl -rdynamic -L/usr/local/lib ../lib/mylib/libmylib.a -lcurl -Wl,-rpath,/usr/local/lib 

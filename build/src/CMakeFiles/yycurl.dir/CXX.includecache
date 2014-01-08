@@ -9,11 +9,15 @@
 ../src/../lib/mylib/ConsoleDisplay.h
 Observer.h
 ../src/../lib/mylib/Observer.h
+FetchData.h
+../src/../lib/mylib/FetchData.h
 iostream
 -
 stdio.h
 -
 pthread.h
+-
+sys/time.h
 -
 
 ../src/../lib/mylib/DownloadNode.h
@@ -27,11 +31,7 @@ DownloadNode.h
 ../src/../lib/mylib/DownloadNode.h
 fstream
 -
-vector
--
 string
--
-pthread.h
 -
 curl/curl.h
 -
@@ -43,18 +43,20 @@ vector
 -
 string
 -
+string.h
+-
+DownloadNode.h
+../src/../lib/mylib/DownloadNode.h
 
 ../src/../lib/mylib/Subject.h
 pthread.h
 -
 string
 -
-vector
--
 fstream
 -
-sys/time.h
--
+DownloadNode.h
+../src/../lib/mylib/DownloadNode.h
 
 /home/ime/workspace/yycurl/src/Main.cpp
 mylib/DownloadNode.h
@@ -68,9 +70,5 @@ mylib/FetchData.h
 mylib/ConsoleDisplay.h
 /home/ime/workspace/yycurl/src/mylib/ConsoleDisplay.h
 iostream
--
-sstream
--
-vector
 -
 

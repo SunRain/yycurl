@@ -9,21 +9,37 @@
 /home/ime/workspace/yycurl/lib/mylib/ConsoleDisplay.cpp
 ConsoleDisplay.h
 /home/ime/workspace/yycurl/lib/mylib/ConsoleDisplay.h
-DownloadNode.h
-/home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
 
 /home/ime/workspace/yycurl/lib/mylib/ConsoleDisplay.h
 Observer.h
 /home/ime/workspace/yycurl/lib/mylib/Observer.h
+FetchData.h
+/home/ime/workspace/yycurl/lib/mylib/FetchData.h
 iostream
 -
 stdio.h
 -
 pthread.h
 -
+sys/time.h
+-
 
 /home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
 string
+-
+
+/home/ime/workspace/yycurl/lib/mylib/FetchData.h
+Subject.h
+/home/ime/workspace/yycurl/lib/mylib/Subject.h
+DownloadNode.h
+/home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
+fstream
+-
+string
+-
+curl/curl.h
+-
+sys/time.h
 -
 
 /home/ime/workspace/yycurl/lib/mylib/Observer.h
@@ -31,4 +47,18 @@ vector
 -
 string
 -
+string.h
+-
+DownloadNode.h
+/home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
+
+/home/ime/workspace/yycurl/lib/mylib/Subject.h
+pthread.h
+-
+string
+-
+fstream
+-
+DownloadNode.h
+/home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
 

@@ -45,6 +45,11 @@ void *ConsoleDisplay::yyshow(void *ptr){
 }
 
 bool ConsoleDisplay::fetch_over(){
+//	for(int i = 0; i < WORK_NUM; i++){
+//		if(local_length[i] < total_length[i])
+//			return false;
+//	}
+//	return true;
 	return false;
 }
 

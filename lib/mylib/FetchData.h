@@ -13,7 +13,7 @@ class FetchData : public Subject{
 public:
 	FetchData(){};
 	FetchData(std::string url[], std::string path[]);
-	int get_download_file_length(std::string &url);
+	int get_download_file_length(std::string url);
 	void start();
 	void join();
 private:

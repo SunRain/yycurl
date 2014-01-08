@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <string>
+<<<<<<< HEAD
 #include <fstream>
 #include "DownloadNode.h"
 
@@ -19,6 +20,16 @@ protected:
 	int get_local_file_length(std::string &path);
 private:
 	pthread_mutex_t mutex;
+=======
+#include <vector>
+#include <fstream>
+#include <sys/time.h>
+
+class Subject{
+public:
+	void notify();
+	int get_local_file_length(std::string path);
+>>>>>>> 5c5d12f895a7d480c6c48d441f01edb5562b84f9
 };
 
 

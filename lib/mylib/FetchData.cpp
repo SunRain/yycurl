@@ -60,10 +60,9 @@ void *FetchData::yycurl(void *ptr){
 		/*not allow signals*/
 		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 		/*print log*/
-//		FILE *fp = fopen("/tmp/yycurl.log", "r");
+//		FILE *fp = fopen("/tmp/yycurl.log", "a+");
 //		curl_easy_setopt(curl, CURLOPT_STDERR, fp);
 //		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-
 
 		res = curl_easy_perform(curl);
 		if(res != CURLE_OK){
@@ -71,7 +70,6 @@ void *FetchData::yycurl(void *ptr){
 		}
 		curl_easy_cleanup(curl);
 //		fclose(fp);
-
 	}
 
 	/*rename download file*/

@@ -17,7 +17,7 @@ public:
 protected:
 	pthread_t fetch_thread[5];
 	DownloadNode shared_node[5];
-	int get_local_file_length(std::string &path);
+	int get_local_file_length(std::string path);
 private:
 	pthread_mutex_t mutex;
 };

@@ -16,7 +16,8 @@ void Subject::notify(void *ptr){
 	DownloadNode *node = static_cast<DownloadNode*>(ptr);
 	pthread_mutex_lock(&mutex);
 	buffer_is_new[node->id] = true;
-	node->local_file_length = get_local_file_length(node->path);
+	std::string tmp_path = node->path + ".yytmp";
+	node->local_file_length = get_local_file_length(tmp_path);
 	pthread_mutex_unlock(&mutex);
 }
 
@@ -29,10 +30,9 @@ DownloadNode Subject::get_info(int id){
 	return ret;
 }
 
-int Subject::get_local_file_length(std::string &path){
+int Subject::get_local_file_length(std::string path){
     std::ifstream fin;
-    std::string tmp_path = path + ".yytmp";
-    fin.open(tmp_path.c_str(), std::ios::app);
+    fin.open(path.c_str(), std::ios::app);
     fin.seekg(0, std::ios::end);
     std::streampos ps = fin.tellg();
     return (int)ps;

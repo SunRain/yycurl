@@ -6,6 +6,7 @@
 #include "DownloadNode.h"
 #include <fstream>
 #include <string>
+#include <unistd.h>
 #include <stdio.h>
 #include <curl/curl.h>
 #include <sys/time.h>

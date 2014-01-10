@@ -1,5 +1,7 @@
 #include "FetchData.h"
 
+extern bool STOP_ALL;
+
 FetchData::FetchData(std::string url[], std::string path[]){
 	/* Must initialize libcurl before any threads are started */
 	curl_global_init(CURL_GLOBAL_ALL);
@@ -11,6 +13,7 @@ FetchData::FetchData(std::string url[], std::string path[]){
 		shared_node[i].path = path[i];
 		shared_node[i].local_file_length = get_local_file_length(path[i]);
 		shared_node[i].download_file_length = get_download_file_length(url[i]);
+		shared_node[i].done = false;
 	}
 }
 
@@ -21,9 +24,23 @@ void FetchData::start(){
 }
 
 void FetchData::join(){
-	/*wait for the end*/
 	for(int i = 0; i < WORK_NUM; i++){
+		/*wait for the end*/
 		pthread_join(fetch_thread[i], NULL);
+
+		/*rename download file*/
+		if(shared_node[i].local_file_length >= shared_node[i].download_file_length){
+			std::string tmp_path = shared_node[i].path + ".yytmp";
+			if(rename(tmp_path.c_str(), shared_node[i].path.c_str()) < 0){
+				std::ofstream fout;
+				fout.open("/tmp/yycurl.error", std::ios::app);
+				fout << "rename " << tmp_path.c_str() << " failed. " << std::endl;
+				fout.close();
+			}
+			else{
+				shared_node[i].done = true;
+			}
+		}
 	}
 }
 
@@ -39,6 +56,10 @@ void *FetchData::yycurl(void *ptr){
 		curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, node->local_file_length);
 		/*allow 301 and 302*/
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+		/*not allow signals*/
+		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+		/*print log*/
+//		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
 		res = curl_easy_perform(curl);
 		if(res != CURLE_OK){
@@ -50,21 +71,26 @@ void *FetchData::yycurl(void *ptr){
 
 
 void FetchData::error_output(CURLcode res){
-        std::ofstream fout;
-        fout.open("/tmp/yycurl.error", std::ios::app);
-        fout << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-        fout.close();
+	std::ofstream fout;
+	fout.open("/tmp/yycurl.error", std::ios::app);
+	fout << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+	fout.close();
 }
 
 size_t FetchData::write_function(char *data, size_t size, size_t nmemb, void *ptr){
-        DownloadNode *node = static_cast<DownloadNode*>(ptr);
-        std::ofstream fout;
-        fout.open(node->path.c_str(), std::ios::app);
-        fout.write(data, nmemb * size);
-        fout.close();
-        FetchData fetch_data;
-        fetch_data.notify(ptr);
-        return nmemb * size;
+	if(STOP_ALL){
+		pthread_exit(NULL);
+		return 0;
+	}
+	DownloadNode *node = static_cast<DownloadNode*>(ptr);
+	std::ofstream fout;
+	std::string tmp_path = node->path + ".yytmp";
+	fout.open(tmp_path.c_str(), std::ios::app);
+	fout.write(data, nmemb * size);
+	fout.close();
+	FetchData fetch_data;
+	fetch_data.notify(ptr);
+	return nmemb * size;
 }
 
 

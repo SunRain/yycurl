@@ -1,5 +1,7 @@
 #include "ConsoleDisplay.h"
 
+extern bool STOP_ALL;
+
 ConsoleDisplay::ConsoleDisplay(FetchData *s){
 	this->subject = s;
 }
@@ -22,6 +24,7 @@ void ConsoleDisplay::start(){
 		total_length[i] = info.download_file_length;
 		local_length[i] = info.download_file_length;
 		speed[i] = 0;
+		done[i] = info.done;
 		display(i);
 	}
 
@@ -33,25 +36,22 @@ void ConsoleDisplay::join(){
 	pthread_join(show_thread, NULL);
 }
 
+void ConsoleDisplay::ctrl_z(int signal){
+	puts("");
+	STOP_ALL = true;
+}
+
 void *ConsoleDisplay::yyshow(void *ptr){
 	ConsoleDisplay *console = static_cast<ConsoleDisplay*>(ptr);
+	signal(SIGINT, ctrl_z);
 	while(1){
-		if(console->fetch_over())
-			break;
+		if(STOP_ALL) break;
 		if(console->subject->buffer_is_new)
 			console->update();
 		sleep(1);
 	}
 }
 
-bool ConsoleDisplay::fetch_over(){
-//	for(int i = 0; i < WORK_NUM; i++){
-//		if(local_length[i] < total_length[i])
-//			return false;
-//	}
-//	return true;
-	return false;
-}
 
 void ConsoleDisplay::update(){
 	/*get work number*/
@@ -75,6 +75,7 @@ void ConsoleDisplay::update(){
 			download_length = 0;
 		speed[i] = 1e6 * download_length / timeuse;
 		local_length[i] = info.local_file_length;
+		done[i] = info.done;
 		display(i);
 	}
 }
@@ -82,10 +83,20 @@ void ConsoleDisplay::update(){
 
 void ConsoleDisplay::display(int id){
 	double ans = local_length[id] * 100.0 / total_length[id];
-	std::cout << "\033[" << id * 2 + 1 << ";1H";
-	std::cout << "-From: [" << (url[id].size() > 50 ? "a long url" : url[id]) << "] To: [" << path[id] << "]\n";
-	if(total_length[id] == -1)
-		printf("Downloading: %d / ?? (?? %%) %.2lf KB/s\n", local_length[id], speed[id] / 1000);
+	/*display at top of the console*/
+	if(id == 0)
+		std::cout << "\033[1;1H";
+
+	/*display URL and local path*/
+	std::cout << "- From: [" << url[id] << "]\n  To: [" << path[id] << "]\n";
+
+	if(done[id])
+		std::cout << "  Done: ";
 	else
-		printf("Downloading: %d / %d (%.2lf %%) %.2lf KB/s\n", local_length[id], total_length[id], ans, speed[id] / 1000);
+		std::cout << "  Downloading: ";
+	if(total_length[id] == -1)
+		printf("%d / ?? (?? %%) %.2lf KB/s\n\n", local_length[id], speed[id] / 1000);
+	else
+		printf("%d / %d (%.2lf %%) %.2lf KB/s\n\n", local_length[id], total_length[id], ans, speed[id] / 1000);
+
 }

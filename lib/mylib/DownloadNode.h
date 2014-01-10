@@ -9,6 +9,7 @@ struct DownloadNode{
 	std::string path;
 	int local_file_length;
 	int download_file_length;
+	bool done;
 };
 
 #endif /* DOWNLOADNODE_H_ */

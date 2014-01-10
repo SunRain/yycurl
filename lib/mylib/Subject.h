@@ -11,6 +11,7 @@ public:
 	int WORK_NUM;
 	bool buffer_is_new[5];
 	Subject();
+	void set_work_num(int new_num);
 	void notify(void *ptr);
 	DownloadNode get_info(int id);
 protected:

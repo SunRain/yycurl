@@ -8,6 +8,10 @@ Subject::Subject(){
 	pthread_mutex_init(&mutex, NULL);
 }
 
+void Subject::set_work_num(int new_num){
+	WORK_NUM = new_num;
+}
+
 void Subject::notify(void *ptr){
 	DownloadNode *node = static_cast<DownloadNode*>(ptr);
 	pthread_mutex_lock(&mutex);
@@ -27,7 +31,8 @@ DownloadNode Subject::get_info(int id){
 
 int Subject::get_local_file_length(std::string &path){
     std::ifstream fin;
-    fin.open(path.c_str(), std::ios::app);
+    std::string tmp_path = path + ".yytmp";
+    fin.open(tmp_path.c_str(), std::ios::app);
     fin.seekg(0, std::ios::end);
     std::streampos ps = fin.tellg();
     return (int)ps;

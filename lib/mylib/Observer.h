@@ -18,6 +18,7 @@ protected:
 	int local_length[5];
 	int total_length[5];
 	double speed[5];
+	bool done[5];
 };
 
 #endif /* OBSERVER_H_ */

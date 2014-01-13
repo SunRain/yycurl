@@ -18,7 +18,9 @@ public:
 	void start();
 	void join();
 private:
+	bool all_done;
 	int WORK_NUM;
+	int TOTAL_NUM;
 	FetchData *subject;
 	pthread_t show_thread;
 	struct timeval time_start;

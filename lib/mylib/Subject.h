@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <queue>
 #include "DownloadNode.h"
 
 class Subject{
@@ -16,11 +17,12 @@ public:
 	void notify(void *ptr);
 	DownloadNode get_info(int id);
 protected:
-	std::vector<pthread_t> fetch_thread;
+	std::vector<pthread_t> worker_thread;
+	std::queue<DownloadNode*> task_queue;
 	std::vector<DownloadNode> shared_node;
 	int get_local_file_length(std::string path);
 private:
-	pthread_mutex_t mutex;
+	pthread_mutex_t share_mutex;
 };
 
 

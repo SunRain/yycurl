@@ -4,7 +4,7 @@
 
 Subject::Subject(){
 	WORK_NUM = 3;
-	pthread_mutex_init(&mutex, NULL);
+	pthread_mutex_init(&share_mutex, NULL);
 }
 
 void Subject::set_work_num(int new_num){
@@ -13,22 +13,22 @@ void Subject::set_work_num(int new_num){
 
 void Subject::notify(void *ptr){
 	DownloadNode *node = static_cast<DownloadNode*>(ptr);
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&share_mutex);
 
 	node->buffer_is_new = true;
 	std::string tmp_path = node->path + ".yytmp";
 	node->local_file_length = get_local_file_length(tmp_path);
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&share_mutex);
 }
 
 DownloadNode Subject::get_info(int id){
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&share_mutex);
 
 	if(shared_node[id].buffer_is_new)
 		shared_node[id].buffer_is_new = false;
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&share_mutex);
 	return shared_node[id];
 }
 

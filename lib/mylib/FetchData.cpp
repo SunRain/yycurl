@@ -11,14 +11,11 @@ FetchData::FetchData(int num, std::vector<std::string> &url, std::vector<std::st
 
 	/*initialize*/
 	shared_node.clear();
-	fetch_thread.clear();
+	pthread_mutex_init(&my_queue.mutex, NULL);
 
 	for(int i = 0; i < TOTAL_NUM; i++){
 		DownloadNode node;
-		pthread_t thread;
-		bool buffer;
 		shared_node.push_back(node);
-		fetch_thread.push_back(thread);
 
 		/*shared node initial*/
 		shared_node[i].id = i;
@@ -42,89 +39,89 @@ FetchData::FetchData(int num, std::vector<std::string> &url, std::vector<std::st
 	}
 }
 
-int FetchData::download_num(int val){
-	int ret = 0;
-	for(int i = 0; i < val; i++){
-		if(!shared_node[i].done){
-			ret++;
-		}
-	}
-	return ret;
-}
-
 void FetchData::start(){
 	/*change work_num*/
 	WORK_NUM = WORK_NUM < TOTAL_NUM ? WORK_NUM : TOTAL_NUM;
 
-	/*thread start*/
+	/*initialize*/
+	worker_thread.clear();
 	for(int i = 0; i < WORK_NUM; i++){
-		pthread_create(&fetch_thread[i], NULL, yycurl, (void *)&shared_node[i]);
+		pthread_t thread;
+		worker_thread.push_back(thread);
+	}
+	while(!my_queue.task.empty()) my_queue.task.pop();
+	for(int i = 0; i < TOTAL_NUM; i++){
+		my_queue.task.push(&shared_node[i]);
 	}
 
-	for(int i = WORK_NUM; i < TOTAL_NUM; i++){
-		while(download_num(i) == WORK_NUM && !STOP_ALL)
-			usleep(100);
-		pthread_create(&fetch_thread[i], NULL, yycurl, (void *)&shared_node[i]);
+	/*thread start*/
+	for(int i = 0; i < WORK_NUM; i++){
+		pthread_create(&worker_thread[i], NULL, yycurl, (void *)&my_queue);
 	}
 }
 
 void FetchData::join(){
-	for(int i = 0; i < TOTAL_NUM; i++){
+	for(int i = 0; i < WORK_NUM; i++){
 		/*wait for the end*/
-		pthread_join(fetch_thread[i], NULL);
+		pthread_join(worker_thread[i], NULL);
 	}
 }
 
 void *FetchData::yycurl(void *ptr){
-	DownloadNode *node = static_cast<DownloadNode*>(ptr);
+	MyQueue *que = static_cast<MyQueue *>(ptr);
 	/*if download complete*/
-	if(node->done){
-		pthread_exit(NULL);
-	}
+	while(!que->task.empty()){
+//		std::cout << que->size() << std::endl;
+		pthread_mutex_lock(&que->mutex);
+		DownloadNode *node = que->task.front();
+		que->task.pop();
+		pthread_mutex_unlock(&que->mutex);
 
-	/*download start*/
-	node->begin = true;
+		if(node->done)
+			continue;
+		/*download start*/
+		node->begin = true;
+		/*curl handle initialize and fetch begin*/
+		CURL *curl = curl_easy_init();
+		CURLcode res;
 
-	/*curl handle initialize and fetch begin*/
-	CURL *curl = curl_easy_init();
-	CURLcode res;
-	if(curl){
-		curl_easy_setopt(curl, CURLOPT_URL, node->url.c_str());
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_function);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, ptr);
-		curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, node->local_file_length);
-		/*allow 301 and 302*/
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-		/*not allow signals*/
-		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-		/*print log*/
-//		FILE *fp = fopen("/tmp/yycurl.log", "a+");
-//		curl_easy_setopt(curl, CURLOPT_STDERR, fp);
-//		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+		if(curl){
+			curl_easy_setopt(curl, CURLOPT_URL, node->url.c_str());
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_function);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)node);
+			curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, node->local_file_length);
+			/*allow 301 and 302*/
+			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+			/*not allow signals*/
+			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			/*print log*/
+//			FILE *fp = fopen("/tmp/yycurl.log", "a+");
+//			curl_easy_setopt(curl, CURLOPT_STDERR, fp);
+//			curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-		res = curl_easy_perform(curl);
+			res = curl_easy_perform(curl);
 
-		if(res != CURLE_OK){
-			error_output(res);
+			if(res != CURLE_OK){
+				error_output(res);
+			}
+			curl_easy_cleanup(curl);
+//			fclose(fp);
 		}
-		curl_easy_cleanup(curl);
-//		fclose(fp);
-	}
 
-	/*rename download file*/
-	if(node->local_file_length >= node->download_file_length){
-		std::string tmp_path = node->path + ".yytmp";
-		if(rename(tmp_path.c_str(), node->path.c_str()) < 0){
-			std::ofstream fout;
-			fout.open("/tmp/yycurl.error", std::ios::app);
-			fout << "rename " << tmp_path.c_str() << " failed. " << std::endl;
-			fout.close();
-		}
-		else{
-			node->done = true;
+		/*rename download file*/
+		if(node->local_file_length >= node->download_file_length){
+			std::string tmp_path = node->path + ".yytmp";
+			if(rename(tmp_path.c_str(), node->path.c_str()) < 0){
+				std::ofstream fout;
+				fout.open("/tmp/yycurl.error", std::ios::app);
+				fout << "rename " << tmp_path.c_str() << " failed. " << std::endl;
+				fout.close();
+			}
+			else{
+				node->done = true;
+			}
 		}
 	}
-
 }
 
 void FetchData::error_output(CURLcode res){

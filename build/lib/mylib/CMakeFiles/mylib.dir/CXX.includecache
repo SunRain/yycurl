@@ -84,6 +84,14 @@ vector
 DownloadNode.h
 /home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
 
+/home/ime/workspace/yycurl/lib/mylib/Subject.cpp
+Subject.h
+/home/ime/workspace/yycurl/lib/mylib/Subject.h
+iostream
+-
+string.h
+-
+
 /home/ime/workspace/yycurl/lib/mylib/Subject.h
 pthread.h
 -

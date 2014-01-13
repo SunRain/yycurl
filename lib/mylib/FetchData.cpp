@@ -63,7 +63,7 @@ void FetchData::start(){
 
 	for(int i = WORK_NUM; i < TOTAL_NUM; i++){
 		while(download_num(i) == WORK_NUM && !STOP_ALL)
-			sleep(1);
+			usleep(100);
 		pthread_create(&fetch_thread[i], NULL, yycurl, (void *)&shared_node[i]);
 	}
 }

@@ -18,7 +18,6 @@ public:
 	DownloadNode get_info(int id);
 protected:
 	std::vector<pthread_t> worker_thread;
-	std::queue<DownloadNode*> task_queue;
 	std::vector<DownloadNode> shared_node;
 	int get_local_file_length(std::string path);
 private:

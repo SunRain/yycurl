@@ -23,10 +23,6 @@ signal.h
 -
 pthread.h
 -
-sys/time.h
--
-stdlib.h
--
 
 /home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
 string
@@ -35,8 +31,6 @@ string
 /home/ime/workspace/yycurl/lib/mylib/FetchData.cpp
 FetchData.h
 /home/ime/workspace/yycurl/lib/mylib/FetchData.h
-iostream
--
 
 /home/ime/workspace/yycurl/lib/mylib/FetchData.h
 Subject.h
@@ -56,8 +50,6 @@ queue
 unistd.h
 -
 pthread.h
--
-stdio.h
 -
 curl/curl.h
 -
@@ -84,15 +76,9 @@ vector
 DownloadNode.h
 /home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
 
-/home/ime/workspace/yycurl/lib/mylib/Subject.cpp
-Subject.h
 /home/ime/workspace/yycurl/lib/mylib/Subject.h
-iostream
--
-string.h
--
-
-/home/ime/workspace/yycurl/lib/mylib/Subject.h
+DownloadNode.h
+/home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
 pthread.h
 -
 string
@@ -101,8 +87,4 @@ fstream
 -
 vector
 -
-queue
--
-DownloadNode.h
-/home/ime/workspace/yycurl/lib/mylib/DownloadNode.h
 

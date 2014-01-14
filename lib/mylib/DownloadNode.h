@@ -4,13 +4,17 @@
 #include <string>
 
 struct DownloadNode{
-	int id;
 	std::string url;
 	std::string path;
+	//completed size
 	int local_file_length;
+	//total size
 	int download_file_length;
+	//if true, the task started
 	bool begin;
+	//if true, the task completed
 	bool done;
+	//called write function, but haven't notified
 	bool buffer_is_new;
 };
 

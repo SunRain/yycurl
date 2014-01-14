@@ -14,6 +14,7 @@ public:
 	Observer();
 	virtual void update(){};
 protected:
+	//storing updated data
 	std::vector<std::string> url;
 	std::vector<std::string> path;
 	std::vector<int> local_length;

@@ -1,6 +1,4 @@
 #include "Subject.h"
-#include <iostream>
-#include <string.h>
 
 Subject::Subject(){
 	WORK_NUM = 3;
@@ -29,6 +27,7 @@ DownloadNode Subject::get_info(int id){
 		shared_node[id].buffer_is_new = false;
 
 	pthread_mutex_unlock(&share_mutex);
+	//get copy
 	return shared_node[id];
 }
 

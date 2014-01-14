@@ -1,15 +1,13 @@
 #include "FetchData.h"
-#include <iostream>
 
 extern bool STOP_ALL;
 
 FetchData::FetchData(int num, std::vector<std::string> &url, std::vector<std::string> &path){
-	/* Must initialize libcurl before any threads are started */
+	// Must initialize libcurl before any threads are started
 	curl_global_init(CURL_GLOBAL_ALL);
 
+	//initialize
 	TOTAL_NUM = num;
-
-	/*initialize*/
 	shared_node.clear();
 	pthread_mutex_init(&my_queue.mutex, NULL);
 
@@ -17,17 +15,15 @@ FetchData::FetchData(int num, std::vector<std::string> &url, std::vector<std::st
 		DownloadNode node;
 		shared_node.push_back(node);
 
-		/*shared node initial*/
-		shared_node[i].id = i;
+		//shared node initialize
 		shared_node[i].url = url[i];
 		shared_node[i].path = path[i];
 		shared_node[i].download_file_length = get_download_file_length(url[i]);
 		shared_node[i].begin = false;
 		shared_node[i].buffer_is_new = false;
 
-		/*download complete judging*/
+		//download complete judging, if file exits(return 0), download complete
 		if(access(path[i].c_str(), 0) == 0){
-			/*download complete*/
 			shared_node[i].local_file_length = get_local_file_length(path[i]);
 			shared_node[i].done = true;
 		}
@@ -40,10 +36,10 @@ FetchData::FetchData(int num, std::vector<std::string> &url, std::vector<std::st
 }
 
 void FetchData::start(){
-	/*change work_num*/
+	//change work_num
 	WORK_NUM = WORK_NUM < TOTAL_NUM ? WORK_NUM : TOTAL_NUM;
 
-	/*initialize*/
+	//initialize worker_thread and task queue
 	worker_thread.clear();
 	for(int i = 0; i < WORK_NUM; i++){
 		pthread_t thread;
@@ -54,7 +50,7 @@ void FetchData::start(){
 		my_queue.task.push(&shared_node[i]);
 	}
 
-	/*thread start*/
+	//worker threads start
 	for(int i = 0; i < WORK_NUM; i++){
 		pthread_create(&worker_thread[i], NULL, yycurl, (void *)&my_queue);
 	}
@@ -62,26 +58,27 @@ void FetchData::start(){
 
 void FetchData::join(){
 	for(int i = 0; i < WORK_NUM; i++){
-		/*wait for the end*/
 		pthread_join(worker_thread[i], NULL);
 	}
 }
 
 void *FetchData::yycurl(void *ptr){
 	MyQueue *que = static_cast<MyQueue *>(ptr);
-	/*if download complete*/
-	while(!que->task.empty()){
-//		std::cout << que->size() << std::endl;
+
+	while(1){
 		pthread_mutex_lock(&que->mutex);
+		//if task queue is empty, thread exit
+		if(que->task.empty())
+			break;
 		DownloadNode *node = que->task.front();
 		que->task.pop();
 		pthread_mutex_unlock(&que->mutex);
 
 		if(node->done)
 			continue;
-		/*download start*/
+		//download start
 		node->begin = true;
-		/*curl handle initialize and fetch begin*/
+		//curl handle initialize and fetch begin
 		CURL *curl = curl_easy_init();
 		CURLcode res;
 
@@ -90,14 +87,10 @@ void *FetchData::yycurl(void *ptr){
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_function);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)node);
 			curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, node->local_file_length);
-			/*allow 301 and 302*/
+			//allow 301 and 302
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-			/*not allow signals*/
+			//not allow signals
 			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-			/*print log*/
-//			FILE *fp = fopen("/tmp/yycurl.log", "a+");
-//			curl_easy_setopt(curl, CURLOPT_STDERR, fp);
-//			curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
 			res = curl_easy_perform(curl);
 
@@ -105,10 +98,9 @@ void *FetchData::yycurl(void *ptr){
 				error_output(res);
 			}
 			curl_easy_cleanup(curl);
-//			fclose(fp);
 		}
 
-		/*rename download file*/
+		//rename download file
 		if(node->local_file_length >= node->download_file_length){
 			std::string tmp_path = node->path + ".yytmp";
 			if(rename(tmp_path.c_str(), node->path.c_str()) < 0){
@@ -132,19 +124,20 @@ void FetchData::error_output(CURLcode res){
 }
 
 size_t FetchData::write_function(char *data, size_t size, size_t nmemb, void *ptr){
+	//if ctrl+z, stop the thread
 	if(STOP_ALL){
 		pthread_exit(NULL);
 	}
+	//write data into the file
 	DownloadNode *node = static_cast<DownloadNode*>(ptr);
 	std::ofstream fout;
 	std::string tmp_path = node->path + ".yytmp";
 	fout.open(tmp_path.c_str(), std::ios::app);
 	fout.write(data, nmemb * size);
 	fout.close();
-
+	//notify
 	FetchData fetch_data;
 	fetch_data.notify(ptr);
-
 	return nmemb * size;
 }
 

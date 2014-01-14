@@ -6,7 +6,9 @@
 #include <pthread.h>
 
 struct MyQueue{
+	//mutex lock of task queue
 	pthread_mutex_t mutex;
+	//task queue, used to stored tasks which haven't been started
 	std::queue<DownloadNode*> task;
 };
 

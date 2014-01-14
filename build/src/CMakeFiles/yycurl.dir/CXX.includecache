@@ -19,10 +19,6 @@ signal.h
 -
 pthread.h
 -
-sys/time.h
--
-stdlib.h
--
 
 ../src/../lib/mylib/DownloadNode.h
 string
@@ -46,8 +42,6 @@ queue
 unistd.h
 -
 pthread.h
--
-stdio.h
 -
 curl/curl.h
 -
@@ -75,6 +69,8 @@ DownloadNode.h
 ../src/../lib/mylib/DownloadNode.h
 
 ../src/../lib/mylib/Subject.h
+DownloadNode.h
+../src/../lib/mylib/DownloadNode.h
 pthread.h
 -
 string
@@ -83,10 +79,6 @@ fstream
 -
 vector
 -
-queue
--
-DownloadNode.h
-../src/../lib/mylib/DownloadNode.h
 
 /home/ime/workspace/yycurl/src/Main.cpp
 mylib/DownloadNode.h
@@ -99,11 +91,7 @@ mylib/FetchData.h
 /home/ime/workspace/yycurl/src/mylib/FetchData.h
 mylib/ConsoleDisplay.h
 /home/ime/workspace/yycurl/src/mylib/ConsoleDisplay.h
-iostream
--
 sstream
--
-fstream
 -
 vector
 -

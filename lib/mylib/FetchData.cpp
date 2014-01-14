@@ -65,11 +65,9 @@ void FetchData::join(){
 void *FetchData::yycurl(void *ptr){
 	MyQueue *que = static_cast<MyQueue *>(ptr);
 
-	while(1){
+	//if task queue is empty, thread exit
+	while(!que->task.empty()){
 		pthread_mutex_lock(&que->mutex);
-		//if task queue is empty, thread exit
-		if(que->task.empty())
-			break;
 		DownloadNode *node = que->task.front();
 		que->task.pop();
 		pthread_mutex_unlock(&que->mutex);

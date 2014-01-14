@@ -7,15 +7,16 @@ ConsoleDisplay::ConsoleDisplay(FetchData *s){
 }
 
 void ConsoleDisplay::start(){
-	/*console clear*/
+	//console clear
 	std::string clr = "\033[2J";
 	std::cout << clr;
 
-	/*get start time*/
+	//initialize start time
 	gettimeofday(&time_start, NULL);
 
-	/*data_init*/
+	//data_init
 	TOTAL_NUM = subject->TOTAL_NUM;
+	WORK_NUM = subject->WORK_NUM;
 	url.clear();
 	path.clear();
 	total_length.clear();
@@ -36,7 +37,7 @@ void ConsoleDisplay::start(){
 		display(i);
 	}
 
-	/*start display thread*/
+	//start display thread
 	pthread_create(&show_thread, NULL, yyshow, this);
 }
 
@@ -61,26 +62,24 @@ void *ConsoleDisplay::yyshow(void *ptr){
 
 
 void ConsoleDisplay::update(){
-	/*get work number*/
-	WORK_NUM = subject->WORK_NUM;
-
-	/*console clear*/
+	//console clear
 	std::string clr = "\033[2J";
 	std::cout << clr;
 
-	/*get the time now*/
+	//get the present time, and difference value between last time and this time
 	struct timeval time_end;
 	gettimeofday(&time_end, NULL);
 	double timeuse = 1e6 * (time_end.tv_sec - time_start.tv_sec) + time_end.tv_usec - time_start.tv_usec;
 	time_start = time_end;
 
-	/*update info*/
+	//initialize all_done
 	all_done = true;
+	//update information
 	for(int i = 0; i < TOTAL_NUM; i++){
 		DownloadNode info = subject->get_info(i);
+		//get size of new data
 		int download_length = info.local_file_length - local_length[i];
-		if(download_length < 0)
-			download_length = 0;
+		//calculate downloading speed
 		speed[i] = 1e6 * download_length / timeuse;
 		local_length[i] = info.local_file_length;
 		begin[i] = info.begin;
@@ -94,24 +93,20 @@ void ConsoleDisplay::update(){
 
 
 void ConsoleDisplay::display(int id){
-	/*display at top of the console*/
+	//display at top of the console
 	if(id == 0){
 		std::cout << "\033[1;1H";
 	}
+	//if downloading
 	if(begin[id] && !done[id]){
 		all_done = false;
 		double ans = local_length[id] * 100.0 / total_length[id];
-		/*display URL and local path*/
+		//display URL and local path
 		std::cout << "- From: [" << url[id] << "]\n  To: [" << path[id] << "]\n";
-		if(done[id])
-			std::cout << "  Done: ";
-		else if(begin[id])
-			std::cout << "  Downloading: ";
-		else
-			std::cout << "  Waiting: ";
+		//if can't get total length of the url, print ??
 		if(total_length[id] == -1)
-			printf("%d / ?? (?? %%) %.2lf KB/s\n\n", local_length[id], speed[id] / 1000);
+			printf("  Downloading: %d / ?? (?? %%) %.2lf KB/s\n\n", local_length[id], speed[id] / 1000);
 		else
-			printf("%d / %d (%.2lf %%) %.2lf KB/s\n\n", local_length[id], total_length[id], ans, speed[id] / 1000);
+			printf("  Downloading: %d / %d (%.2lf %%) %.2lf KB/s\n\n", local_length[id], total_length[id], ans, speed[id] / 1000);
 	}
 }

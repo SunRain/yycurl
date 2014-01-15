@@ -12,14 +12,14 @@
 bool STOP_ALL = false;
 
 void test(int &num, std::vector<std::string> &url, std::vector<std::string> &path){
-        num = 100;
-        for(int i = 0; i < 100; i++){
-                url.push_back("http://b.zol-img.com.cn/desk/bizhi/image/1/1920x1200/1349683516475.jpg");
-                std::stringstream ostr;
-                ostr << i;
-                std::string tmp= "/tmp/" + ostr.str() + ".jpg";
-                path.push_back(tmp);
-        }
+	num = 100;
+	for(int i = 0; i < 100; i++){
+		url.push_back("http://b.zol-img.com.cn/desk/bizhi/image/1/1920x1200/1349683516475.jpg");
+		std::stringstream ostr;
+		ostr << i;
+		std::string tmp= "/tmp/" + ostr.str() + ".jpg";
+		path.push_back(tmp);
+	}
 }
 
 int main(){

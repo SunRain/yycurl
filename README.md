@@ -15,3 +15,6 @@
 ~/yycurl/build>make
 
 ~/yycurl/build>./bin/yycurl
+
+一些bug：
+断点续传时，出现Requested range was not delivered by the server，目前使用重联解决，重联次数暂时不设上限。

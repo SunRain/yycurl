@@ -18,7 +18,7 @@ class FetchData : public Subject{
 public:
 	FetchData(){};
 	//DownloadNode initialize
-	FetchData(int num, std::vector<std::string> &url, std::vector<std::string> &path);
+	FetchData(int num, std::vector<std::string> url, std::vector<std::string> path);
 	//get total length of downloading file
 	int get_download_file_length(std::string url);
 	//start WORK_NUM downloading threads
@@ -28,8 +28,8 @@ public:
 private:
 	//task queue
 	MyQueue my_queue;
-	//curl_perform error output
-	static void error_output(CURLcode res);
+	//curl_perform error output and retry again
+	static void error_output(DownloadNode *node, CURLcode res);
 	//downloading thread
 	static void *yycurl(void *ptr);
 	//CURLOPT_WRITEFUNCTION, write data into the file and notify

@@ -16,6 +16,8 @@ struct DownloadNode{
 	bool done;
 	//called write function, but haven't notified
 	bool buffer_is_new;
+	//retry time
+	int retry_time;
 };
 
 #endif /* DOWNLOADNODE_H_ */

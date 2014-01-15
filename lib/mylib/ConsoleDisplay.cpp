@@ -72,8 +72,7 @@ void ConsoleDisplay::update(){
 	double timeuse = 1e6 * (time_end.tv_sec - time_start.tv_sec) + time_end.tv_usec - time_start.tv_usec;
 	time_start = time_end;
 
-	//initialize all_done
-	all_done = true;
+	done_num = 0;
 	//update information
 	for(int i = 0; i < TOTAL_NUM; i++){
 		DownloadNode info = subject->get_info(i);
@@ -81,12 +80,15 @@ void ConsoleDisplay::update(){
 		int download_length = info.local_file_length - local_length[i];
 		//calculate downloading speed
 		speed[i] = 1e6 * download_length / timeuse;
+		total_length[i] = info.download_file_length;
 		local_length[i] = info.local_file_length;
 		begin[i] = info.begin;
 		done[i] = info.done;
+		if(done[i])
+			done_num++;
 		display(i);
 	}
-	if(all_done){
+	if(done_num == TOTAL_NUM){
 		std::cout << "all done!" << std::endl;
 	}
 }
@@ -99,7 +101,6 @@ void ConsoleDisplay::display(int id){
 	}
 	//if downloading
 	if(begin[id] && !done[id]){
-		all_done = false;
 		double ans = local_length[id] * 100.0 / total_length[id];
 		//display URL and local path
 		std::cout << "- From: [" << url[id] << "]\n  To: [" << path[id] << "]\n";

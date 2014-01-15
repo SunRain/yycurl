@@ -22,8 +22,8 @@ public:
 	//join the thread
 	void join();
 private:
-	//judging if all the task have been done
-	bool all_done;
+	//record how many tasks have been done
+	int done_num;
 	//number of worker threads, set by Subject::set_work_num(int)
 	int WORK_NUM;
 	//number of tasks, set by num in FetchData::FetchData(int num, std::vector<std::string> &url, std::vector<std::string> &path)

@@ -16,5 +16,4 @@ include_directories(/usr/include)
 link_directories(/usr/local/lib)
 
 add_executable(yycurl ${YYCURL_STAT_SRCS})
-
 target_link_libraries(yycurl mylib)

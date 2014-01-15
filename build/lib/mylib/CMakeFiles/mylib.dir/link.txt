@@ -1,0 +1,2 @@
+/usr/bin/ar cr libmylib.a  CMakeFiles/mylib.dir/ConsoleDisplay.cpp.o CMakeFiles/mylib.dir/Subject.cpp.o CMakeFiles/mylib.dir/VersionUpdate.cpp.o CMakeFiles/mylib.dir/FetchData.cpp.o CMakeFiles/mylib.dir/Observer.cpp.o
+/usr/bin/ranlib libmylib.a

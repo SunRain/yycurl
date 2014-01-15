@@ -15,8 +15,8 @@ void ConsoleDisplay::start(){
 	gettimeofday(&time_start, NULL);
 
 	//data_init
-	TOTAL_NUM = subject->TOTAL_NUM;
-	WORK_NUM = subject->WORK_NUM;
+	TASK_NUM = subject->get_task_num();
+	WORK_NUM = subject->get_work_num();
 	url.clear();
 	path.clear();
 	total_length.clear();
@@ -25,7 +25,7 @@ void ConsoleDisplay::start(){
 	begin.clear();
 	done.clear();
 
-	for(int i = 0; i < TOTAL_NUM; i++){
+	for(int i = 0; i < TASK_NUM; i++){
 		DownloadNode info = subject->get_info(i);
 		url.push_back(info.url);
 		path.push_back(info.path);
@@ -74,7 +74,7 @@ void ConsoleDisplay::update(){
 
 	done_num = 0;
 	//update information
-	for(int i = 0; i < TOTAL_NUM; i++){
+	for(int i = 0; i < TASK_NUM; i++){
 		DownloadNode info = subject->get_info(i);
 		//get size of new data
 		int download_length = info.local_file_length - local_length[i];
@@ -88,8 +88,12 @@ void ConsoleDisplay::update(){
 			done_num++;
 		display(i);
 	}
-	if(done_num == TOTAL_NUM){
-		std::cout << "all done!" << std::endl;
+	if(done_num == TASK_NUM){
+		std::cout << "all " << done_num << " files done!" << std::endl;
+	}
+	else{
+		std::cout << std::endl;
+		std::cout << done_num << " files done!" << std::endl;
 	}
 }
 

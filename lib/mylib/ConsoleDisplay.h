@@ -27,7 +27,7 @@ private:
 	//number of worker threads, set by Subject::set_work_num(int)
 	int WORK_NUM;
 	//number of tasks, set by num in FetchData::FetchData(int num, std::vector<std::string> &url, std::vector<std::string> &path)
-	int TOTAL_NUM;
+	int TASK_NUM;
 	//source of download information, set by ConsoleDisplay(FetchData *s)
 	FetchData *subject;
 	//show thread identification

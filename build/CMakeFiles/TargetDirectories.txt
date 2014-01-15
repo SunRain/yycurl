@@ -1,0 +1,2 @@
+/home/ime/workspace/yycurl/build/lib/mylib/CMakeFiles/mylib.dir
+/home/ime/workspace/yycurl/build/src/CMakeFiles/yycurl.dir

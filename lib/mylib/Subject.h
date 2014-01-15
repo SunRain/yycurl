@@ -9,19 +9,25 @@
 
 class Subject{
 public:
-	//number of worker threads, set by Subject::set_work_num(int)
-	int WORK_NUM;
-	//number of tasks, set by num in FetchData::FetchData(int num, std::vector<std::string> &url, std::vector<std::string> &path)
-	int TOTAL_NUM;
 	//set default WORK_NUM(3), and initialize shared_mutex
 	Subject();
 	//set number of worker threads
-	void set_work_num(int new_num);
+	void set_work_num(int work_num);
+	//set total number of tasks
+	void set_task_num(int task_num);
+	//get number of worker threads
+	int get_work_num();
+	//get total number of tasks
+	int get_task_num();
 	//notify there is new data
 	void notify(void *ptr);
 	//get the copy of id'th shared_node
 	DownloadNode get_info(int id);
 protected:
+	//number of worker threads, set by Subject::set_work_num(int)
+	int WORK_NUM;
+	//number of tasks, set by Subject::set_task_num(int)
+	int TASK_NUM;
 	//index of worker threads
 	std::vector<pthread_t> worker_thread;
 	//shared memory stored downloading information

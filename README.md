@@ -6,7 +6,7 @@
 使用ctrl+c结束显示
 
 使用方法：
-安装cmake以及libcurl
+安装cmake,libcurl以及openssl libssl-dev
 
 ~/yycurl>cd build
 

@@ -8,11 +8,11 @@ FetchData::FetchData(int num, std::vector<std::string> url, std::vector<std::str
 	curl_global_init(CURL_GLOBAL_ALL);
 
 	//initialize
-	TOTAL_NUM = num;
 	shared_node.clear();
 	pthread_mutex_init(&my_queue.mutex, NULL);
+	this->set_task_num(num);
 
-	for(int i = 0; i < TOTAL_NUM; i++){
+	for(int i = 0; i < TASK_NUM; i++){
 		DownloadNode node;
 		shared_node.push_back(node);
 
@@ -30,7 +30,7 @@ FetchData::FetchData(int num, std::vector<std::string> url, std::vector<std::str
 
 void FetchData::start(){
 	//change work_num
-	WORK_NUM = WORK_NUM < TOTAL_NUM ? WORK_NUM : TOTAL_NUM;
+	WORK_NUM = WORK_NUM < TASK_NUM ? WORK_NUM : TASK_NUM;
 
 	//initialize worker_thread and task queue
 	worker_thread.clear();
@@ -39,7 +39,7 @@ void FetchData::start(){
 		worker_thread.push_back(thread);
 	}
 	my_queue.task.clear();
-	for(int i = 0; i < TOTAL_NUM; i++){
+	for(int i = 0; i < TASK_NUM; i++){
 		my_queue.task.push_back(&shared_node[i]);
 	}
 

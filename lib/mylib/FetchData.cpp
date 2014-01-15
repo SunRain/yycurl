@@ -100,6 +100,11 @@ void *FetchData::yycurl(void *ptr){
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 			//not allow signals
 			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			//print log
+			FILE *fp = fopen("/tmp/yycurl.log", "a+");
+			curl_easy_setopt(curl, CURLOPT_STDERR, fp);
+			curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
 			//if perform error, retry!
 			if((res = curl_easy_perform(curl)) != CURLE_OK){
 				error_output(node, res);
@@ -109,6 +114,7 @@ void *FetchData::yycurl(void *ptr){
 				pthread_mutex_unlock(&que->mutex);
 			}
 			curl_easy_cleanup(curl);
+			fclose(fp);
 		}
 
 		//rename download file

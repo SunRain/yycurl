@@ -28,6 +28,7 @@ public:
 	int get_local_file_length(std::string path);
 	void check(std::string check_path);
 	void update(std::string check_path);
+	void string_replace(std::string& strBig, const std::string &strsrc, const std::string &strdst);
 private:
 	int mode;
 	int file_num;

@@ -36,6 +36,7 @@ void VersionUpdate::get_res(){
 		tmp = outernet + version + "/res.md5";
 		res_url.push_back(tmp);
 	}
+	std::cout << tmp << std::endl;
 	res_path.push_back("/tmp/res.md5");
 	FetchData fetch_res(1, res_url, res_path);
 	fetch_res.start();
@@ -60,6 +61,16 @@ bool VersionUpdate::create_dir(std::string path){
 	return true;
 }
 
+void VersionUpdate::string_replace(std::string& strBig, const std::string &strsrc, const std::string &strdst)
+{
+     std::string::size_type pos = 0;
+     while( (pos = strBig.find(strsrc, pos)) != std::string::npos)
+     {
+         strBig.replace(pos, strsrc.length(), strdst);
+         pos += strdst.length();
+     }
+}
+
 void VersionUpdate::read_res(){
 	std::ifstream fin;
 	fin.open("/tmp/res.md5", std::ios::in);
@@ -68,6 +79,7 @@ void VersionUpdate::read_res(){
 		getline(fin, path_input);
 		getline(fin, md5_input);
 		getline(fin, length_input);
+		string_replace(path_input, " ", "%20");
 		if(mode == 1){
 			url_input = intranet + version + "/" + path_input;
 		}

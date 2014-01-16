@@ -171,6 +171,7 @@ int FetchData::get_download_file_length(std::string url){
 		curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &downloadfilelength);
 	}
 	else{
+		//if return -1, means cannot get total length of the url
 		downloadfilelength = -1;
 	}
 	curl_easy_cleanup(curl);

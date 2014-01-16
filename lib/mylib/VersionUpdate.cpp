@@ -1,6 +1,7 @@
 #include "VersionUpdate.h"
 
 VersionUpdate::VersionUpdate(){
+	//some default setting
 	intranet = "http://172.16.0.85/v";
 	outernet = "http://retest.imobile-ent.com/v";
 	loc_file_num = 0;
@@ -9,6 +10,7 @@ VersionUpdate::VersionUpdate(){
 	mode = 1;
 	content_path = "/tmp/";
 
+	//vectors initialize
 	res_url.clear();
 	res_path.clear();
 	res_md5.clear();
@@ -29,6 +31,8 @@ void VersionUpdate::set_version(std::string vr){
 
 void VersionUpdate::set_content_path(std::string content){
 	int length = content.size();
+
+	//if content doesn't end with '/', add it
 	if(content[length-1] != '/'){
 		content = content + "/";
 	}
@@ -54,20 +58,28 @@ void VersionUpdate::download_res(std::string res_loc){
 	res_path_tmp.clear();
 	std::string tmp = "";
 	if(mode == 1){
+		//download mode 1, from intranet
 		tmp = intranet + version + "/res.md5";
 		res_url_tmp.push_back(tmp);
 	}
 	else{
+		//download mode 2, from outernet
 		tmp = outernet + version + "/res.md5";
 		res_url_tmp.push_back(tmp);
 	}
 	res_path_tmp.push_back(res_loc);
+
+	//if '/tmp/res.md5' exits, delete it
 	if(access(res_loc.c_str(), 0) == 0){
 		remove(res_loc.c_str());
 	}
+
+	//download res.md5
 	FetchData fetch_res(1, res_url_tmp, res_path_tmp);
 	fetch_res.start();
 	fetch_res.join();
+
+	//read from res.md5
 	read_res(res_loc);
 }
 
@@ -77,7 +89,9 @@ bool VersionUpdate::create_dir(std::string path, int authority){
 	for(int i = 0; i < (int)path.size(); i++){
 		if(path[i] == '/' && i > 0){
 			str[i] = '\0';
+			//flag F_OK meaning test for existence of the file.
 			if(access(str, F_OK)<0){
+				//if not exists, mkdir
 				if(mkdir(str, authority)<0){
 					return false;
 				}
@@ -103,24 +117,45 @@ void VersionUpdate::read_res(std::string res_loc){
 	fin.open(res_loc.c_str(), std::ios::in);
 	while(1){
 		std::string path_input, md5_input, length_input, url_input;
+		//read three lines
 		getline(fin, path_input);
 		getline(fin, md5_input);
 		getline(fin, length_input);
+
+		//change length_input from string to integer
 		std::stringstream ostr;
 		int length_int;
 		ostr << length_input;
 		ostr >> length_int;
+
+		//replace space to %20 in url
 		string_replace(path_input, " ", "%20");
+
 		if(mode == 1){
 			url_input = intranet + version + "/" + path_input;
 		}
 		else{
 			url_input = intranet + version + "/" + path_input;
 		}
+
+		//get to the end of res.md5, jump out
 		if(fin.eof())
 			break;
+
 		path_input = content_path + path_input;
-		create_dir(path_input, 0755);
+
+		//create the directory
+		bool create = create_dir(path_input, 0755);
+
+		//if create directory failed
+		if(!create){
+			std::ofstream fout;
+			fout.open("/tmp/yycurl.error", std::ios::app);
+			fout << "create directory [" << path_input << "] error!" << std::endl;
+			fout.close();
+		}
+
+		//data update
 		res_url.push_back(url_input);
 		res_path.push_back(path_input);
 		res_md5.push_back(md5_input);
@@ -138,15 +173,21 @@ std::string VersionUpdate::file_md5(std::string file_name){
 	char buffer[1024];
 	std::string hash = "";
 	MD5_Init(&md5);
+
+	//open file in binary
 	std::ifstream fin(file_name.c_str(), std::ios::in | std::ios::binary);
 	while(!fin.eof()){
+		//read 1024 byte
 		fin.read(buffer, 1024);
 		length = fin.gcount();
 		if(length > 0){
+			//if read s.th., update md5
 			MD5_Update(&md5, buffer, length);
 		}
 	}
 	MD5_Final(md, &md5);
+
+	//change md5 to HEX
 	for(int i = 0; i < 16; i++){
 		sprintf(tmp, "%02x", md[i]);
 		hash += (std::string)tmp;
@@ -166,6 +207,7 @@ void VersionUpdate::check(std::string check_log){
 	bool all_right = true;
 	std::ofstream fout(check_log.c_str(), std::ios::out);
 	for(int i = 0; i < res_file_num; i++){
+		//either md5 or length checking failed, all failed
 		if(res_md5[i] != file_md5(res_path[i]) || res_length[i] != get_local_file_length(res_path[i])){
 			all_right = false;
 			fout << "[" << res_path[i] << "] wrong" << std::endl;
@@ -208,6 +250,8 @@ void VersionUpdate::update(std::string update_log){
 	std::cout << clr;
 	get_all_file(content_path+"data");
 
+	std::ofstream fout(update_log.c_str(), std::ios::out);
+
 	//map check_md5 initialize
 	for(int i = 0; i < loc_file_num; i++){
 		std::string md5 = file_md5(local_file[i]);
@@ -215,35 +259,55 @@ void VersionUpdate::update(std::string update_log){
 		std::cout << "\033[1;1H";
 		printf("Local file MD5 calculating: %d / %d (%.2lf %%)\n", i+1, loc_file_num, (double)(i + 1) *100 / loc_file_num);
 	}
+
+	//if no local file
 	if(loc_file_num == 0){
 		std::cout << "\033[1;1H";
 		printf("No local files exists.\n");
 	}
+
+	//get which url should be downloaded
 	std::map<std::string, std::string>::iterator iter;
 	for(int i = 0; i < res_file_num; i++){
 		iter = md5_check.find(res_path[i]);
 		if(iter != md5_check.end()){
+			//file exits
 			if(md5_check[res_path[i]] == res_md5[i]){
+				//needn't to be updated
 				md5_check.erase(iter);
 			}
 			else{
+				//file should be updated
 				download_url.push_back(res_url[i]);
 				download_path.push_back(res_path[i]);
 				download_file_num++;
 			}
 		}
 		else{
+			//file not exists, should be downloaded
 			download_url.push_back(res_url[i]);
 			download_path.push_back(res_path[i]);
 			download_file_num++;
 		}
 		std::cout << "\033[2;1H";
-		printf("Need download num: %d\n", download_file_num);
+		printf("The number of file need to be updated: %d\n", download_file_num);
 	}
+
+	//wait a second, to let you see the number clearly
 	sleep(1);
+
+	//removing resources which is useless
 	for(iter = md5_check.begin(); iter != md5_check.end(); ++iter){
+		//print log
+		fout << "remove：   " << iter->first << std::endl;
 		remove(iter->first.c_str());
 		std::cout << "\033[2;1H";
 		printf("Removing rubbish..");
 	}
+
+	//print log
+	for(int i = 0; i < (int)download_path.size(); i++){
+		fout << "download: " << download_path[i] << std::endl;
+	}
+	fout.close();
 }

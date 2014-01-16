@@ -89,11 +89,15 @@ void ConsoleDisplay::update(){
 		display(i);
 	}
 	if(done_num == TASK_NUM){
-		std::cout << "all " << done_num << " files done!" << std::endl;
+		//console clear
+		std::string clr = "\033[2J";
+		std::cout << clr;
+		std::cout << "\033[1;1H";
+		std::cout << "all " << done_num << " files downloaded!" << std::endl;
 	}
 	else{
 		std::cout << std::endl;
-		std::cout << done_num << " files done!" << std::endl;
+		std::cout << done_num << " / " << TASK_NUM << " files downloaded!" << std::endl;
 	}
 }
 

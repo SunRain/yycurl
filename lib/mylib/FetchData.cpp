@@ -3,7 +3,9 @@
 
 extern bool STOP_ALL;
 
-FetchData::FetchData(int num, std::vector<std::string> url, std::vector<std::string> path){
+FetchData::FetchData(int num,
+					std::vector<std::string> url,
+					std::vector<std::string> path){
 	// Must initialize libcurl before any threads are started
 	curl_global_init(CURL_GLOBAL_ALL);
 

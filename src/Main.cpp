@@ -1,3 +1,4 @@
+//./yycurl (mode) (version), just like ./yycurl 1 15166 -- means download from http://172.16.0.85/v15166
 //during the downloding, the file will be named as *.yytmp
 //under /tmp/ , there are yycurl.error and yycurl.log
 //yycurl.error shows errors during downloading
@@ -12,17 +13,22 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <stdlib.h>
 
 //if true, kill all the downloading threads and the showing thread
 bool STOP_ALL = false;
 
 
-int main(){
+int main(int argc, char *argv[]){
+	if(argc != 3){
+		std::cout << "parameter error!" << std::endl;
+		return 0;
+	}
 	VersionUpdate version;
 	//mode 1 means intranet download, others mean outernet download
-	version.set_mode(1);
+	version.set_mode(atoi(argv[1]));
 	//set download version
-	version.set_version("15166");
+	version.set_version(argv[2]);
 	//set download directory,
 	version.set_content_path("/tmp/");
 	//set the download path of res.md5

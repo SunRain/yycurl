@@ -114,6 +114,7 @@ void *FetchData::yycurl(void *ptr){
 				pthread_mutex_lock(&que->mutex);
 				que->task.push_front(node);
 				pthread_mutex_unlock(&que->mutex);
+				sleep(1);
 			}
 			curl_easy_cleanup(curl);
 			fclose(fp);

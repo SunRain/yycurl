@@ -94,6 +94,8 @@ void ConsoleDisplay::update(){
 		std::cout << clr;
 		std::cout << "\033[1;1H";
 		std::cout << "all " << done_num << " files downloaded!" << std::endl;
+		sleep(1);
+		pthread_exit(NULL);
 	}
 	else{
 		std::cout << std::endl;

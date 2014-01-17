@@ -19,7 +19,7 @@ public:
 	VersionUpdate();
 	//set download mode, mode 1 means intranet download, others mean outernet download
 	//intranet url is like: http://172.16.0.85/v15166/res.md5
-	//outernet url is like:
+	//outernet url is like: http://retest.imobile-ent.com/v15200/res.md5
 	void set_mode(int md);
 	//set download version to be vr
 	void set_version(std::string vr);

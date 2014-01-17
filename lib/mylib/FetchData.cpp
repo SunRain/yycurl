@@ -102,6 +102,8 @@ void *FetchData::yycurl(void *ptr){
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 			//not allow signals
 			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			//tells the library to fail silently if the HTTP code returned is equal to or larger than 400.
+			curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 			//print log
 			FILE *fp = fopen("/tmp/yycurl.log", "a+");
 			curl_easy_setopt(curl, CURLOPT_STDERR, fp);
@@ -126,7 +128,7 @@ void *FetchData::yycurl(void *ptr){
 			if(rename(tmp_path.c_str(), node->path.c_str()) < 0){
 				std::ofstream fout;
 				fout.open("/tmp/yycurl.error", std::ios::app);
-				fout << "rename " << tmp_path.c_str() << " failed. " << std::endl;
+				fout << " - rename " << tmp_path.c_str() << " failed. " << std::endl;
 				fout.close();
 			}
 			else{
@@ -139,8 +141,8 @@ void *FetchData::yycurl(void *ptr){
 void FetchData::error_output(DownloadNode *node, CURLcode res){
 	std::ofstream fout;
 	fout.open("/tmp/yycurl.error", std::ios::app);
-	fout << "[" << node->url << "] (" << node->retry_time << ") local_length: " << node->local_file_length
-			<<"\ncurl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+	fout << " - [" << node->url << "] (" << node->retry_time << ")"
+			<<"\n   curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
 	fout.close();
 }
 

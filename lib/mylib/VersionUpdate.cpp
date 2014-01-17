@@ -302,7 +302,7 @@ void VersionUpdate::update(std::string update_log){
 	//wait a second, to let you see the number clearly
 	sleep(1);
 
-	//removing resources which is useless
+	//removing resources which are useless
 	for(iter = md5_check.begin(); iter != md5_check.end(); ++iter){
 		//print log
 		fout << "remove:   " << iter->first << std::endl;

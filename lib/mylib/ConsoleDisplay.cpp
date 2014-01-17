@@ -56,7 +56,7 @@ void *ConsoleDisplay::yyshow(void *ptr){
 	while(1){
 		if(STOP_ALL) break;
 		console->update();
-		sleep(1);
+		usleep(5e5);
 	}
 }
 

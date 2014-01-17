@@ -1,5 +1,7 @@
 #include "VersionUpdate.h"
 
+extern bool STOP_ALL;
+
 VersionUpdate::VersionUpdate(){
 	//some default setting
 	intranet = "http://172.16.0.85/v";
@@ -135,7 +137,7 @@ void VersionUpdate::read_res(std::string res_loc){
 			url_input = intranet + version + "/" + path_input;
 		}
 		else{
-			url_input = intranet + version + "/" + path_input;
+			url_input = outernet + version + "/" + path_input;
 		}
 
 		//get to the end of res.md5, jump out
@@ -204,13 +206,17 @@ int VersionUpdate::get_local_file_length(std::string path){
 }
 
 void VersionUpdate::check(std::string check_log){
+	//if unexpected halt, not to do checking
+	if(STOP_ALL)
+		return;
 	bool all_right = true;
+	int error_num = 0;
 	std::ofstream fout(check_log.c_str(), std::ios::out);
 	for(int i = 0; i < res_file_num; i++){
 		//either md5 or length checking failed, all failed
 		if(res_md5[i] != file_md5(res_path[i]) || res_length[i] != get_local_file_length(res_path[i])){
 			all_right = false;
-			fout << "[" << res_path[i] << "] wrong" << std::endl;
+			fout << ++error_num << ": [" << res_path[i] << "] wrong" << std::endl;
 		}
 		std::cout << "\033[3;1H";
 		printf("Checking: %d / %d (%.2lf %%)\n", i+1, res_file_num, (double)(i + 1) *100 / res_file_num);
@@ -299,7 +305,7 @@ void VersionUpdate::update(std::string update_log){
 	//removing resources which is useless
 	for(iter = md5_check.begin(); iter != md5_check.end(); ++iter){
 		//print log
-		fout << "remove：   " << iter->first << std::endl;
+		fout << "remove:   " << iter->first << std::endl;
 		remove(iter->first.c_str());
 		std::cout << "\033[2;1H";
 		printf("Removing rubbish..");

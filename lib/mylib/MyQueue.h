@@ -6,6 +6,8 @@
 #include <pthread.h>
 
 struct MyQueue{
+	//number of trial
+	int max_retry;
 	//mutex lock of task queue
 	pthread_mutex_t mutex;
 	//task queue, used to stored tasks which haven't been started

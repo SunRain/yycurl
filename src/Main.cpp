@@ -39,11 +39,12 @@ int main(int argc, char *argv[]){
 	//initialize fetching data
 	FetchData fetch(version.get_download_num(),
 					version.get_download_url(),
-					version.get_download_path());
+					version.get_download_path(),
+					version.get_download_md5());
 	//set number of worker thread, default is 3
 	fetch.set_work_num(5);
 	//set number of retry
-//	fetch.set_try_num(10);
+	fetch.set_try_num(10);
 	ConsoleDisplay console(&fetch);
 	//start downloading
 	fetch.start();
@@ -51,7 +52,5 @@ int main(int argc, char *argv[]){
 	console.start();
 	fetch.join();
 	console.join();
-	//length and md5 checking, according to res.md5
-	version.check("/tmp/check.log");
 	return 0;
 }

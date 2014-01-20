@@ -1,16 +1,8 @@
 #ifndef VERSIONUPDATE_H_
 #define VERSIONUPDATE_H_
 
-#include "FetchData.h"
 #include <vector>
 #include <string>
-#include <fstream>
-#include <iostream>
-#include <sys/stat.h>
-#include <string.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <sstream>
 #include <map>
 
 class VersionUpdate{
@@ -28,12 +20,12 @@ public:
 	std::vector<std::string> get_download_url();
 	//get the vector download_path
 	std::vector<std::string> get_download_path();
+	//get the vector res_md5
+	std::vector<std::string> get_download_md5();
 	//get download_file_num
 	int get_download_num();
 	//download the file res.md5 to res_loc
 	void download_res(std::string res_loc);
-	//check md5 and length of all files in the res.md5, the location of error log is check_log
-	void check(std::string check_log);
 	//update
 	void update(std::string update_path);
 private:
@@ -67,6 +59,8 @@ private:
 	std::vector<std::string> download_url;
 	//storing paths need to be downloaded
 	std::vector<std::string> download_path;
+	//storign md5s need to be download
+	std::vector<std::string> download_md5;
 	//used to judging which file need to be updated, used in VersionUpdate::update(std::string update_log)
 	std::map<std::string, std::string> md5_check;
 	//read res.md5, and initialize res_url, res_path, res_md5, res_length

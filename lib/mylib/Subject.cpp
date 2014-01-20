@@ -1,5 +1,7 @@
 #include "Subject.h"
 #include "FileOperation.h"
+#include <fstream>
+#include <string>
 
 Subject::Subject(){
 	this->WORK_NUM = 3;
@@ -15,12 +17,20 @@ void Subject::set_task_num(int task_num){
 	this->TASK_NUM = task_num;
 }
 
+void Subject::set_try_num(int try_num){
+	this->TRY_NUM = try_num;
+}
+
 int Subject::get_work_num(){
 	return WORK_NUM;
 }
 
 int Subject::get_task_num(){
 	return TASK_NUM;
+}
+
+int Subject::get_try_num(){
+	return TRY_NUM;
 }
 
 void Subject::notify(void *ptr){

@@ -3,9 +3,6 @@
 
 #include "Observer.h"
 #include "FetchData.h"
-#include <iostream>
-#include <stdio.h>
-#include <signal.h>
 #include <pthread.h>
 
 //call ConsoleDisplay(FetchData *s) first, then start() and join() in the end
@@ -24,6 +21,8 @@ public:
 private:
 	//record how many tasks have been done
 	int done_num;
+	//record how many tasks have been checked
+	int check_num;
 	//number of worker threads, set by Subject::set_work_num(int)
 	int WORK_NUM;
 	//number of tasks, set by num in FetchData::FetchData(int num, std::vector<std::string> &url, std::vector<std::string> &path)

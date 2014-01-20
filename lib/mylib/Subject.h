@@ -3,8 +3,6 @@
 
 #include "DownloadNode.h"
 #include <pthread.h>
-#include <string>
-#include <fstream>
 #include <vector>
 
 class Subject{
@@ -15,10 +13,14 @@ public:
 	void set_work_num(int work_num);
 	//set total number of tasks
 	void set_task_num(int task_num);
+	//set number of trial
+	void set_try_num(int try_num);
 	//get number of worker threads
 	int get_work_num();
 	//get total number of tasks
 	int get_task_num();
+	//get number of trial
+	int get_try_num();
 	//notify there is new data
 	void notify(void *ptr);
 	//get the copy of id'th shared_node
@@ -28,6 +30,8 @@ protected:
 	int WORK_NUM;
 	//number of tasks, set by Subject::set_task_num(int)
 	int TASK_NUM;
+	//number of trial, set by Subject::set_try_num(int)
+	int TRY_NUM;
 	//index of worker threads
 	std::vector<pthread_t> worker_thread;
 	//shared memory stored downloading information

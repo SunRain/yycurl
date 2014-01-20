@@ -1,11 +1,18 @@
 #include "FetchData.h"
 #include "FileOperation.h"
+#include "DownloadNode.h"
+#include <fstream>
+#include <queue>
+#include <unistd.h>
+#include <pthread.h>
+#include <sys/time.h>
 
 extern bool STOP_ALL;
 
 FetchData::FetchData(int num,
 					std::vector<std::string> url,
-					std::vector<std::string> path){
+					std::vector<std::string> path,
+					std::vector<std::string> md5){
 	//Must initialize libcurl before any threads are started
 	curl_global_init(CURL_GLOBAL_ALL);
 
@@ -13,7 +20,7 @@ FetchData::FetchData(int num,
 	shared_node.clear();
 	pthread_mutex_init(&my_queue.mutex, NULL);
 	this->set_task_num(num);
-	TRY_NUM = 5;
+	this->set_try_num(5);
 
 	for(int i = 0; i < TASK_NUM; i++){
 		DownloadNode node;
@@ -22,7 +29,9 @@ FetchData::FetchData(int num,
 		//shared node initialize
 		shared_node[i].url = url[i];
 		shared_node[i].path = path[i];
+		shared_node[i].md5 = md5[i];
 		shared_node[i].begin = false;
+		shared_node[i].check = false;
 		shared_node[i].done = false;
 		shared_node[i].buffer_is_new = false;
 		shared_node[i].local_file_length = 0;
@@ -41,6 +50,7 @@ void FetchData::start(){
 		pthread_t thread;
 		worker_thread.push_back(thread);
 	}
+	my_queue.max_retry = get_try_num();
 	my_queue.task.clear();
 	for(int i = 0; i < TASK_NUM; i++){
 		my_queue.task.push_back(&shared_node[i]);
@@ -114,11 +124,14 @@ void *FetchData::yycurl(void *ptr){
 
 			//if perform error, retry!
 			if((res = curl_easy_perform(curl)) != CURLE_OK){
-				error_output(node, res);
 				node->retry_time++;
-				pthread_mutex_lock(&que->mutex);
-				que->task.push_front(node);
-				pthread_mutex_unlock(&que->mutex);
+				error_output(node, res);
+				//if try number legal, retry
+				if(node->retry_time <= que->max_retry){
+					pthread_mutex_lock(&que->mutex);
+					que->task.push_front(node);
+					pthread_mutex_unlock(&que->mutex);
+				}
 				usleep(1e5);
 			}
 
@@ -131,14 +144,42 @@ void *FetchData::yycurl(void *ptr){
 			fclose(fp);
 		}
 
-		//rename download file
+
 		if(node->local_file_length >= node->download_file_length){
+			//rename download file
 			std::string tmp_path = node->path + ".yytmp";
 			if(rename(tmp_path.c_str(), node->path.c_str()) < 0){
 				std::ofstream fout;
 				fout.open("/tmp/yycurl.error", std::ios::app);
 				fout << " - rename " << tmp_path.c_str() << " failed. " << std::endl;
 				fout.close();
+			}
+			else{
+				node->check = true;
+			}
+			//check
+			FileOperation file(node->path);
+			if(node->md5 != "" && file.get_file_md5() != node->md5){
+				node->retry_time++;
+				std::ofstream fout;
+				fout.open("/tmp/yycurl.error", std::ios::app);
+				fout << " - [" << node->path << "] (" << node->retry_time << ")"
+						<<"md5 failed." << "\n";
+				fout.close();
+				//if try number legal, retry
+				if(node->retry_time <= que->max_retry){
+					pthread_mutex_lock(&que->mutex);
+					que->task.push_front(node);
+					pthread_mutex_unlock(&que->mutex);
+					node->check = false;
+				}
+				else{
+					fout.open("/tmp/check.log", std::ios::app);
+					fout << " - [" << node->path << "] (" << node->retry_time << ")"
+							<<"\n   md5 check failed: \n[" << file.get_file_md5() << "][" << node->md5 << "]\n";
+					fout.close();
+				}
+				usleep(1e5);
 			}
 			else{
 				node->done = true;

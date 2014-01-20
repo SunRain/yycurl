@@ -3,9 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <string.h>
-#include <vector>
-#include "DownloadNode.h"
 
 extern const int URL_NUM;
 
@@ -21,6 +18,7 @@ protected:
 	std::vector<int> total_length;
 	std::vector<double> speed;
 	std::vector<bool> begin;
+	std::vector<bool> check;
 	std::vector<bool> done;
 };
 

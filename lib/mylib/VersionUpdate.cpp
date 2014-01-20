@@ -1,6 +1,13 @@
 #include "FileOperation.h"
 #include "VersionUpdate.h"
-
+#include "FetchData.h"
+#include <fstream>
+#include <iostream>
+#include <sys/stat.h>
+#include <string.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <sstream>
 
 extern bool STOP_ALL;
 
@@ -22,6 +29,7 @@ VersionUpdate::VersionUpdate(){
 	local_file.clear();
 	download_url.clear();
 	download_path.clear();
+	download_md5.clear();
 	md5_check.clear();
 }
 
@@ -55,11 +63,17 @@ std::vector<std::string> VersionUpdate::get_download_path(){
 	return download_path;
 }
 
+std::vector<std::string> VersionUpdate::get_download_md5(){
+	return download_md5;
+}
+
 void VersionUpdate::download_res(std::string res_loc){
 	std::vector<std::string> res_url_tmp;
 	std::vector<std::string> res_path_tmp;
+	std::vector<std::string> res_md5_tmp;
 	res_url_tmp.clear();
 	res_path_tmp.clear();
+	res_md5_tmp.clear();
 	std::string tmp = "";
 	if(mode == 1){
 		//download mode 1, from intranet
@@ -78,8 +92,10 @@ void VersionUpdate::download_res(std::string res_loc){
 		remove(res_loc.c_str());
 	}
 
+	res_md5_tmp.push_back("");
+
 	//download res.md5
-	FetchData fetch_res(1, res_url_tmp, res_path_tmp);
+	FetchData fetch_res(1, res_url_tmp, res_path_tmp, res_md5_tmp);
 	fetch_res.start();
 	fetch_res.join();
 
@@ -151,30 +167,6 @@ void VersionUpdate::read_res(std::string res_loc){
 	fin.close();
 }
 
-void VersionUpdate::check(std::string check_log){
-	//if unexpected halt, not to do checking
-	if(STOP_ALL)
-		return;
-	bool all_right = true;
-	int error_num = 0;
-	std::ofstream fout(check_log.c_str(), std::ios::out);
-	for(int i = 0; i < res_file_num; i++){
-		//either md5 or length checking failed, all failed
-		FileOperation file(res_path[i]);
-		if(res_md5[i] != file.get_file_md5() || res_length[i] != file.get_file_length()){
-			all_right = false;
-			fout << ++error_num << ": [" << res_path[i] << "] wrong" << std::endl;
-		}
-		std::cout << "\033[3;1H";
-		printf("Checking: %d / %d (%.2lf %%)\n", i+1, res_file_num, (double)(i + 1) *100 / res_file_num);
-	}
-	fout.close();
-	if(all_right)
-		std::cout << "All check success." << std::endl;
-	else
-		std::cout << "Something wrong, please check log at [" << check_log << "]." << std::endl;
-}
-
 void VersionUpdate::get_all_file(std::string path){
 	DIR *dir;
 	struct dirent *dir_entity;
@@ -233,6 +225,7 @@ void VersionUpdate::update(std::string update_log){
 				//file should be updated
 				download_url.push_back(res_url[i]);
 				download_path.push_back(res_path[i]);
+				download_md5.push_back(res_md5[i]);
 				download_file_num++;
 			}
 		}
@@ -240,6 +233,7 @@ void VersionUpdate::update(std::string update_log){
 			//file not exists, should be downloaded
 			download_url.push_back(res_url[i]);
 			download_path.push_back(res_path[i]);
+			download_md5.push_back(res_md5[i]);
 			download_file_num++;
 		}
 		std::cout << "\033[2;1H";

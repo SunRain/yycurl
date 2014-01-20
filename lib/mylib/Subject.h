@@ -32,8 +32,6 @@ protected:
 	std::vector<pthread_t> worker_thread;
 	//shared memory stored downloading information
 	std::vector<DownloadNode> shared_node;
-	//get local file length of path
-	int get_local_file_length(std::string path);
 private:
 	//mutex lock of shared_node
 	pthread_mutex_t share_mutex;

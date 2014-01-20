@@ -23,7 +23,9 @@ public:
 	void start();
 	//join the downloading threads
 	void join();
+
 private:
+	int TRY_NUM;
 	//task queue
 	MyQueue my_queue;
 	//curl_perform error output and retry again

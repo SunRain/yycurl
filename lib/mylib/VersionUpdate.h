@@ -9,9 +9,8 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <unistd.h>
-#include <sstream>
 #include <dirent.h>
-#include <openssl/md5.h>
+#include <sstream>
 #include <map>
 
 class VersionUpdate{
@@ -70,16 +69,10 @@ private:
 	std::vector<std::string> download_path;
 	//used to judging which file need to be updated, used in VersionUpdate::update(std::string update_log)
 	std::map<std::string, std::string> md5_check;
-	//input file_name, return md5(hex) of it which is lower cases
-	std::string file_md5(std::string file_name);
 	//read res.md5, and initialize res_url, res_path, res_md5, res_length
 	void read_res(std::string res_loc);
-	//In value of 'authority' permissions to create the file at 'path'
-	bool create_dir(std::string path, int authority);
 	//replace strsrc into strdst in the strBig
 	void string_replace(std::string& strBig, const std::string &strsrc, const std::string &strdst);
-	//get local file length of path
-	int get_local_file_length(std::string path);
 	//get all files under path, and update the vector local_file
 	void get_all_file(std::string path);
 };

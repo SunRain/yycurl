@@ -103,7 +103,6 @@ void ConsoleDisplay::update(){
 	}
 }
 
-
 void ConsoleDisplay::display(int id){
 	//display at top of the console
 	if(id == 0){

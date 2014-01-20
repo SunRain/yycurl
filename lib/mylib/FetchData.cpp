@@ -1,18 +1,19 @@
 #include "FetchData.h"
-#include <iostream>
+#include "FileOperation.h"
 
 extern bool STOP_ALL;
 
 FetchData::FetchData(int num,
 					std::vector<std::string> url,
 					std::vector<std::string> path){
-	// Must initialize libcurl before any threads are started
+	//Must initialize libcurl before any threads are started
 	curl_global_init(CURL_GLOBAL_ALL);
 
 	//initialize
 	shared_node.clear();
 	pthread_mutex_init(&my_queue.mutex, NULL);
 	this->set_task_num(num);
+	TRY_NUM = 5;
 
 	for(int i = 0; i < TASK_NUM; i++){
 		DownloadNode node;
@@ -76,12 +77,14 @@ void *FetchData::yycurl(void *ptr){
 
 		//download complete judging, if file exits(return 0), download complete
 		if(access(node->path.c_str(), 0) == 0){
-			node->local_file_length = tmp.get_local_file_length(node->path);
+			FileOperation file(node->path);
+			node->local_file_length = file.get_file_length();
 			node->done = true;
 		}
 		else{
 			std::string tmp_path = node->path + ".yytmp";
-			node->local_file_length = tmp.get_local_file_length(tmp_path);
+			FileOperation file(tmp_path);
+			node->local_file_length = file.get_file_length();
 			node->done = false;
 		}
 
@@ -118,6 +121,12 @@ void *FetchData::yycurl(void *ptr){
 				pthread_mutex_unlock(&que->mutex);
 				usleep(1e5);
 			}
+
+			//get http_code;
+			int http_code = 0;
+			curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+
 			curl_easy_cleanup(curl);
 			fclose(fp);
 		}

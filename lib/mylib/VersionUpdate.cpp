@@ -1,4 +1,6 @@
+#include "FileOperation.h"
 #include "VersionUpdate.h"
+
 
 extern bool STOP_ALL;
 
@@ -85,25 +87,6 @@ void VersionUpdate::download_res(std::string res_loc){
 	read_res(res_loc);
 }
 
-bool VersionUpdate::create_dir(std::string path, int authority){
-	char str[path.size() + 1];
-	strcpy(str, path.c_str());
-	for(int i = 0; i < (int)path.size(); i++){
-		if(path[i] == '/' && i > 0){
-			str[i] = '\0';
-			//flag F_OK meaning test for existence of the file.
-			if(access(str, F_OK)<0){
-				//if not exists, mkdir
-				if(mkdir(str, authority)<0){
-					return false;
-				}
-			}
-			str[i] = '/';
-		}
-	}
-	return true;
-}
-
 void VersionUpdate::string_replace(std::string& strBig, const std::string &strsrc, const std::string &strdst)
 {
      std::string::size_type pos = 0;
@@ -147,7 +130,8 @@ void VersionUpdate::read_res(std::string res_loc){
 		path_input = content_path + path_input;
 
 		//create the directory
-		bool create = create_dir(path_input, 0755);
+		FileOperation file(path_input);
+		bool create = file.make_dir(0755);
 
 		//if create directory failed
 		if(!create){
@@ -167,44 +151,6 @@ void VersionUpdate::read_res(std::string res_loc){
 	fin.close();
 }
 
-std::string VersionUpdate::file_md5(std::string file_name){
-	MD5_CTX md5;
-	unsigned char md[16];
-	char tmp[33]={};
-	int length, i;
-	char buffer[1024];
-	std::string hash = "";
-	MD5_Init(&md5);
-
-	//open file in binary
-	std::ifstream fin(file_name.c_str(), std::ios::in | std::ios::binary);
-	while(!fin.eof()){
-		//read 1024 byte
-		fin.read(buffer, 1024);
-		length = fin.gcount();
-		if(length > 0){
-			//if read s.th., update md5
-			MD5_Update(&md5, buffer, length);
-		}
-	}
-	MD5_Final(md, &md5);
-
-	//change md5 to HEX
-	for(int i = 0; i < 16; i++){
-		sprintf(tmp, "%02x", md[i]);
-		hash += (std::string)tmp;
-	}
-	return hash;
-}
-
-int VersionUpdate::get_local_file_length(std::string path){
-    std::ifstream fin;
-    fin.open(path.c_str(), std::ios::app);
-    fin.seekg(0, std::ios::end);
-    std::streampos ps = fin.tellg();
-    return (int)ps;
-}
-
 void VersionUpdate::check(std::string check_log){
 	//if unexpected halt, not to do checking
 	if(STOP_ALL)
@@ -214,7 +160,8 @@ void VersionUpdate::check(std::string check_log){
 	std::ofstream fout(check_log.c_str(), std::ios::out);
 	for(int i = 0; i < res_file_num; i++){
 		//either md5 or length checking failed, all failed
-		if(res_md5[i] != file_md5(res_path[i]) || res_length[i] != get_local_file_length(res_path[i])){
+		FileOperation file(res_path[i]);
+		if(res_md5[i] != file.get_file_md5() || res_length[i] != file.get_file_length()){
 			all_right = false;
 			fout << ++error_num << ": [" << res_path[i] << "] wrong" << std::endl;
 		}
@@ -229,25 +176,25 @@ void VersionUpdate::check(std::string check_log){
 }
 
 void VersionUpdate::get_all_file(std::string path){
-   DIR *dir;
-   struct dirent *dir_entity;
-   dir = opendir(path.c_str());
-   while(dir_entity = readdir(dir)){
-      if(dir_entity->d_type == 0x8){
-         //file
-         std::string full_name = path + "/" + std::string(dir_entity->d_name);
-         local_file.push_back(full_name);
-      }
-      if(dir_entity->d_type == 0x4){
-         if(strcmp(dir_entity->d_name, ".") == 0 || strcmp(dir_entity->d_name, "..") == 0){
-            continue;
-         }
-         //directory
-         std::string full_path = path + "/" + std::string(dir_entity->d_name);
-         get_all_file(full_path);
-      }
-   }
-   loc_file_num = local_file.size();
+	DIR *dir;
+	struct dirent *dir_entity;
+	dir = opendir(path.c_str());
+	while(dir_entity = readdir(dir)){
+		if(dir_entity->d_type == 0x8){
+			//file
+			std::string full_name = path + "/" + std::string(dir_entity->d_name);
+			local_file.push_back(full_name);
+		}
+		if(dir_entity->d_type == 0x4){
+			if(strcmp(dir_entity->d_name, ".") == 0 || strcmp(dir_entity->d_name, "..") == 0){
+				continue;
+			}
+			//directory
+			std::string full_path = path + "/" + std::string(dir_entity->d_name);
+			get_all_file(full_path);
+		}
+	}
+	loc_file_num = local_file.size();
 }
 
 void VersionUpdate::update(std::string update_log){
@@ -260,8 +207,8 @@ void VersionUpdate::update(std::string update_log){
 
 	//map check_md5 initialize
 	for(int i = 0; i < loc_file_num; i++){
-		std::string md5 = file_md5(local_file[i]);
-		md5_check.insert(std::pair<std::string, std::string>(local_file[i], md5));
+		FileOperation file(local_file[i]);
+		md5_check.insert(std::pair<std::string, std::string>(local_file[i], file.get_file_md5()));
 		std::cout << "\033[1;1H";
 		printf("Local file MD5 calculating: %d / %d (%.2lf %%)\n", i+1, loc_file_num, (double)(i + 1) *100 / loc_file_num);
 	}

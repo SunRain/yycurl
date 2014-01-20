@@ -1,4 +1,5 @@
 #include "Subject.h"
+#include "FileOperation.h"
 
 Subject::Subject(){
 	this->WORK_NUM = 3;
@@ -28,7 +29,8 @@ void Subject::notify(void *ptr){
 
 	node->buffer_is_new = true;
 	std::string tmp_path = node->path + ".yytmp";
-	node->local_file_length = get_local_file_length(tmp_path);
+	FileOperation file(tmp_path);
+	node->local_file_length = file.get_file_length();
 
 	pthread_mutex_unlock(&share_mutex);
 }
@@ -44,10 +46,3 @@ DownloadNode Subject::get_info(int id){
 	return shared_node[id];
 }
 
-int Subject::get_local_file_length(std::string path){
-    std::ifstream fin;
-    fin.open(path.c_str(), std::ios::app);
-    fin.seekg(0, std::ios::end);
-    std::streampos ps = fin.tellg();
-    return (int)ps;
-}

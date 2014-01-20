@@ -53,13 +53,5 @@ int main(int argc, char *argv[]){
 	console.join();
 	//length and md5 checking, according to res.md5
 	version.check("/tmp/check.log");
-
-//	std::vector<std::string> url;
-//	std::vector<std::string> path;
-//	url.push_back("http://retest.imobile-ent.com/v15070/res.md5");
-//	path.push_back("/tmp/res.md5");
-//	FetchData fetch(1, url, path);
-//	fetch.start();
-//	fetch.join();
 	return 0;
 }

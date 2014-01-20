@@ -100,7 +100,8 @@ void VersionUpdate::download_res(std::string res_loc){
 	fetch_res.join();
 
 	//read from res.md5
-	read_res(res_loc);
+	if(!STOP_ALL)
+		read_res(res_loc);
 }
 
 void VersionUpdate::string_replace(std::string& strBig, const std::string &strsrc, const std::string &strdst)
@@ -190,6 +191,8 @@ void VersionUpdate::get_all_file(std::string path){
 }
 
 void VersionUpdate::update(std::string update_log){
+	if(STOP_ALL)
+		return;
 	//console clear
 	std::string clr = "\033[2J";
 	std::cout << clr;

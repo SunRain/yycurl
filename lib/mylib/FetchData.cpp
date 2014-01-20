@@ -138,7 +138,9 @@ void *FetchData::yycurl(void *ptr){
 			//get http_code;
 			int http_code = 0;
 			curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
-
+			if(http_code > 400){
+				STOP_ALL = true;
+			}
 
 			curl_easy_cleanup(curl);
 			fclose(fp);

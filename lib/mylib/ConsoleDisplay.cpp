@@ -25,6 +25,18 @@ void ConsoleDisplay::start(){
 	check.clear();
 	done.clear();
 
+	for(int i = 0; i < TASK_NUM; i++){
+		DownloadNode info = subject->get_info(i);
+		url.push_back(info.url);
+		path.push_back(info.path);
+		total_length.push_back(info.download_file_length);
+		local_length.push_back(info.download_file_length);
+		speed.push_back(0);
+		begin.push_back(info.begin);
+		check.push_back(info.check);
+		done.push_back(info.done);
+	}
+
 	//start display thread
 	pthread_create(&show_thread, NULL, yyshow, this);
 }
